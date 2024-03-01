@@ -61,10 +61,8 @@ def alta_registro():
     print("Precio: ", precio_total, "seña: ",
           seña_pac, "restante: ", res_tante)
 
-
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
 
-    # Set up the path for "datos" directory and the Excel file
     datos_dir = os.path.join(current_directory, "datos")
     filepath = os.path.join(datos_dir, "lplantillas.xlsx")
     if not os.path.exists(datos_dir):
@@ -74,8 +72,8 @@ def alta_registro():
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         heading = ["Fecha", "Paciente", "dni", "Telefono", "Sexo", "Edad",
-                    "Plantilla", "Medico", "Cantidad", "Talle", "Scan", "Precio",
-                    "Seña", "Restante"]
+                   "Plantilla", "Medico", "Cantidad", "Talle", "Scan", "Precio",
+                   "Seña", "Restante"]
         sheet.append(heading)
 
     else:
@@ -86,18 +84,17 @@ def alta_registro():
                 cant_plant, talle_plant, scan_check, precio_total, seña_pac, res_tante]
         sheet.append(data)
 
-
     try:
         workbook.save(filepath)
         workbook.close()
-        messagebox.showinfo("Alta de Registro", "La información de la venta está guardada en el archivo xlsx")
-        print("filepath",filepath)
-        print("directory",current_directory)
+        messagebox.showinfo(
+            "Alta de Registro", "La información de la venta está guardada en el archivo xlsx")
+        print("filepath", filepath)
+        print("directory", current_directory)
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
-        print("filepath",filepath)
-        print("directory",current_directory)
-
+        print("filepath", filepath)
+        print("directory", current_directory)
 
     fecha_entry.delete(0, tk.END)
     first_name_entry.delete(0, tk.END)
@@ -108,18 +105,13 @@ def alta_registro():
     medicos_combobox.delete(0, tk.END)
     cantidad_spinbox.delete(0, tk.END)
     talle_spinbox.delete(0, tk.END)
-    # scan_check_var.delete(0, tk.END)
-    # precio_seg.delete(0, tk.END)
     seña_entry.delete(0, tk.END)
     # resta_var.delete(0, tk.END)
 
 
 def calcular_precio():
-    # Obtiene la selección de la plantilla y el talle
     plantilla_seleccionada = plantillas_combobox.get()
     talle_seleccionado = int(talle_spinbox.get())
-
-    # Define los precios base para cada categoría de plantillas
     precios_base = {
         "Poliform": [(22, 29, 11900), (30, 34, 13100), (35, 38, 14100), (39, 110, 14600)],
         "Multiform": [(22, 29, 11900), (30, 34, 13100), (35, 38, 14100), (39, 110, 14600)],
@@ -128,10 +120,7 @@ def calcular_precio():
         "Vaqueta": [(22, 29, 17400), (30, 34, 17700), (35, 38, 18000), (39, 110, 18200)],
         "Silicona": [(22, 29, 5200), (30, 34, 5700), (35, 38, 6200), (39, 110, 6700)],
         "Plastazote": [(22, 29, 11100), (30, 34, 11500), (35, 38, 13000), (39, 110, 13500)]
-        # Agrega más categorías de plantillas si es necesario
     }
-
-# Obtiene el precio base para la plantilla y el talle seleccionados
     precio_base = 0
     if plantilla_seleccionada in precios_base:
         for inicio, fin, precio in precios_base[plantilla_seleccionada]:
@@ -142,23 +131,15 @@ def calcular_precio():
     cantidad = int(cantidad_var.get())
     precio_total = precio_base * cantidad
 
-    # Añade 2500 al precio si ArcoScan está seleccionado
     if scan_check_var.get() == 1:
         precio_total += 4000
-
-        # Actualiza la etiqueta de precio
     precio_seg.set(f"${precio_total}")
 
     seña = int(seña_var.get())
     resta = precio_total - seña
-
-    # Actualiza la etiqueta de precio
     resta_var.set(f"{resta}")
 
 
-######################################
-######################################
-######################################
 window = tkinter.Tk()
 window.title("Plantillas")
 window.configure(bg="lightpink")
@@ -173,7 +154,6 @@ user_info_frame = tkinter.LabelFrame(
     frame, text="Datos del Paciente", background="lightpink")
 user_info_frame.grid(row=0, column=0, padx=20, pady=20)
 
-# labels primer frame con info del paciente
 fecha_label = tkinter.Label(
     user_info_frame, text="Fecha:",  background="#FFB6C1")
 fecha_label.grid(row=0, column=3)
@@ -187,12 +167,10 @@ telephone_label = tkinter.Label(
     user_info_frame, text="Telefono:",  background="#FFB6C1")
 telephone_label.grid(row=3, column=0)
 
-# Entries primer frame con info del paciente
 fecha_entry = tkinter.Entry(user_info_frame)
 first_name_entry = tkinter.Entry(user_info_frame)
 second_name_entry = tkinter.Entry(user_info_frame)
 telephone_entry = tkinter.Entry(user_info_frame)
-
 
 fecha_entry.grid(row=0, column=4)
 first_name_entry.grid(row=1, column=1)
@@ -211,13 +189,8 @@ age_spinbox = tkinter.Spinbox(
 age_label.grid(row=3, column=2)
 age_spinbox.grid(row=3, column=3)
 
-
 for widgets in user_info_frame.winfo_children():
     widgets.grid_configure(padx=10, pady=5)
-
-####### 2 ############
-####### 2 ############
-####### 2 ############
 
 plantillas_frame = tkinter.LabelFrame(
     frame, text="Datos del pedido",  background="#FFB6C1")
@@ -225,7 +198,6 @@ plantillas_frame.grid(row=1, column=0, sticky="news", padx=20, pady=20)
 
 talle_default = tk.StringVar()
 talle_default.set("37")
-
 
 plantillas_label = tkinter.Label(
     plantillas_frame, text="Plantillas:",  background="#FFB6C1")
@@ -249,7 +221,6 @@ cantidad_spinbox = tkinter.Spinbox(
 cantidad_label.grid(row=2, column=0)
 cantidad_spinbox.grid(row=3, column=0)
 
-
 talle_label = tkinter.Label(
     plantillas_frame, text="Talle:",  background="#FFB6C1")
 talle_spinbox = tkinter.Spinbox(
@@ -257,7 +228,6 @@ talle_spinbox = tkinter.Spinbox(
 
 talle_label.grid(row=0, column=1)
 talle_spinbox.grid(row=1, column=1)
-
 
 scan_label = tkinter.Label(
     plantillas_frame, text="Estudio de la pisada:",  background="#FFB6C1")
@@ -268,21 +238,15 @@ scan_check = tkinter.Checkbutton(
 scan_label.grid(row=1, column=3)
 scan_check.grid(row=2, column=3)
 
-
 precio_seg = tk.StringVar()
 precio_seg.set("$0")
 
 for widgets in plantillas_frame.winfo_children():
     widgets.grid_configure(padx=10, pady=5)
 
-########### 3 ##############
-########### 3 ##############
-########### 3 ##############
-
 facturacion_frame = tkinter.LabelFrame(
     frame, text="Facturación", background="lightpink")
 facturacion_frame.grid(row=2, column=0, sticky="news", padx=20, pady=20)
-
 
 preciolabel_label = tkinter.Label(
     facturacion_frame, text="Total",  background="#FFB6C1")
