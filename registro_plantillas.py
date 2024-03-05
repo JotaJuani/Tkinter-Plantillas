@@ -8,10 +8,31 @@ import datetime
 from tkinter import messagebox
 import sys
 
+def generar_pedigrafia():
+    doc = DocxTemplate("nueva_plantigrafia.docx")
+    feecha = datetime.datetime.now().strftime("%Y-%m-%d")
+    nombre = first_name_entry.get()
+    telefono = telephone_entry.get()
+    plantillas = plantillas_combobox.get()
+    talle = talle_spinbox.get()
+    cantidad = cantidad_spinbox.get()
+
+    doc.render({"feecha": feecha,
+                "nombre": nombre,
+                "plantillas": plantillas,
+                "talle": talle,
+                "telefono": telefono,
+                "cantidad": cantidad})
+    
+    doc_nombre = nombre + "plantigrafia" + \
+                feecha + ".docx"
+    doc.save(doc_nombre)
+    messagebox.showinfo("Pedigrafia generada",
+                        "La pedigragia esta lista para ser impresa")
 
 def generar_doc():
     doc = DocxTemplate("invoice.docx")
-    feecha = fecha_entry.get()
+    feecha = datetime.datetime.now().strftime("%Y-%m-%d")
     nombre = first_name_entry.get()
     plantillas = plantillas_combobox.get()
     talle = talle_spinbox.get()
@@ -20,8 +41,9 @@ def generar_doc():
     total = precio_seg.get()
     seña = seña_entry.get()
     resto = resta_var.get()
+    pago = metodo_pago.get()
 
-    doc.render({"fecha": feecha,
+    doc.render({"feecha": feecha,
                 "nombre": nombre,
                 "plantillas": plantillas,
                 "talle": talle,
@@ -29,19 +51,19 @@ def generar_doc():
                 "arcoscan": arcoscan,
                 "total": total,
                 "seña": seña,
-                "resto": resto})
+                "resto": resto,
+                "metodo": pago})
 
-    doc_name = "new_invoce" + nombre + \
-        datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S") + ".docx"
+    doc_name = nombre + "recibo de plantillas" +  \
+                feecha + ".docx"
     doc.save(doc_name)
     messagebox.showinfo("Recibo generado",
-                        "El archivo esta listo para ser impreso")
-
+                        "El recibo esta listo para ser impreso")
 
 def alta_registro():
-    fecha = fecha_entry.get()
+    fecha = datetime.datetime.now().strftime("%Y-%m-%d")
     paciente = first_name_entry.get()
-    dni = second_name_entry.get()
+    dni = dni_entry.get()
     telefeono = telephone_entry.get()
     sexo = gen_combobox.get()
     edad = age_spinbox.get()
@@ -53,13 +75,14 @@ def alta_registro():
     precio_total = precio_seg.get()
     seña_pac = seña_entry.get()
     res_tante = resta_var.get()
+    metodo_de_pago = metodo_pago.get()
 
     print("fecha: ", fecha, "dni: ", dni, "paciente: ", paciente,
           "telefono: ", telefeono, "sexo: ", sexo, "edad: ", edad)
     print("plantilla: ", tipo_plantilla, "medicos: ", medico_s, "cantidad: ",
           cant_plant,  "talle:", talle_plant, "arco scan: ", scan_check)
     print("Precio: ", precio_total, "seña: ",
-          seña_pac, "restante: ", res_tante)
+          seña_pac, "restante: ", res_tante, "metodo de pago", metodo_de_pago)
 
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
 
@@ -73,7 +96,7 @@ def alta_registro():
         sheet = workbook.active
         heading = ["Fecha", "Paciente", "dni", "Telefono", "Sexo", "Edad",
                    "Plantilla", "Medico", "Cantidad", "Talle", "Scan", "Precio",
-                   "Seña", "Restante"]
+                   "Seña", "Restante", "Metodo de pago"]
         sheet.append(heading)
 
     else:
@@ -81,14 +104,14 @@ def alta_registro():
         sheet = workbook.active
 
         data = [fecha, paciente, dni, telefeono, sexo, edad, tipo_plantilla, medico_s,
-                cant_plant, talle_plant, scan_check, precio_total, seña_pac, res_tante]
+                cant_plant, talle_plant, scan_check, precio_total, seña_pac, res_tante, metodo_de_pago]
         sheet.append(data)
 
     try:
         workbook.save(filepath)
         workbook.close()
         messagebox.showinfo(
-            "Alta de Registro", "La información de la venta está guardada en el archivo xlsx")
+            "Alta de Registro", "La orden fue guardada en el archivo 'lplantillas'")
         print("filepath", filepath)
         print("directory", current_directory)
     except Exception as e:
@@ -96,8 +119,8 @@ def alta_registro():
         print("filepath", filepath)
         print("directory", current_directory)
 
-    fecha_entry.delete(0, tk.END)
     first_name_entry.delete(0, tk.END)
+    dni_entry.delete(0, tk.END)
     telephone_entry.delete(0, tk.END)
     gen_combobox.delete(0, tk.END)
     age_spinbox.delete(0, tk.END)
@@ -105,40 +128,20 @@ def alta_registro():
     medicos_combobox.delete(0, tk.END)
     cantidad_spinbox.delete(0, tk.END)
     talle_spinbox.delete(0, tk.END)
+    precio_label.delete(0, tk.END)
     seña_entry.delete(0, tk.END)
-    # resta_var.delete(0, tk.END)
-
-
+    
 def calcular_precio():
-    plantilla_seleccionada = plantillas_combobox.get()
-    talle_seleccionado = int(talle_spinbox.get())
-    precios_base = {
-        "Poliform": [(22, 29, 11900), (30, 34, 13100), (35, 38, 14100), (39, 110, 14600)],
-        "Multiform": [(22, 29, 11900), (30, 34, 13100), (35, 38, 14100), (39, 110, 14600)],
-        "Kramer": [(22, 29, 11900), (30, 34, 13100), (35, 38, 14100), (39, 110, 14600)],
-        "Badana": [(22, 29, 17400), (30, 34, 17700), (35, 38, 18400), (39, 110, 19000)],
-        "Vaqueta": [(22, 29, 17400), (30, 34, 17700), (35, 38, 18000), (39, 110, 18200)],
-        "Silicona": [(22, 29, 5200), (30, 34, 5700), (35, 38, 6200), (39, 110, 6700)],
-        "Plastazote": [(22, 29, 11100), (30, 34, 11500), (35, 38, 13000), (39, 110, 13500)]
-    }
-    precio_base = 0
-    if plantilla_seleccionada in precios_base:
-        for inicio, fin, precio in precios_base[plantilla_seleccionada]:
-            if inicio <= talle_seleccionado <= fin:
-                precio_base = precio
-                break
-
     cantidad = int(cantidad_var.get())
-    precio_total = precio_base * cantidad
+    precio_total = int(precio_seg.get())
 
     if scan_check_var.get() == 1:
         precio_total += 4000
-    precio_seg.set(f"${precio_total}")
+    precio_seg.set(f"{precio_total}")
 
     seña = int(seña_var.get())
     resta = precio_total - seña
     resta_var.set(f"{resta}")
-
 
 window = tkinter.Tk()
 window.title("Plantillas")
@@ -160,21 +163,19 @@ fecha_label.grid(row=0, column=3)
 first_name_label = tkinter.Label(
     user_info_frame, text="Paciente:",  background="#FFB6C1")
 first_name_label.grid(row=1, column=0)
-second_name_label = tkinter.Label(
+dni_label = tkinter.Label(
     user_info_frame, text="DNI:",  background="#FFB6C1")
-second_name_label.grid(row=2, column=0)
+dni_label.grid(row=2, column=0)
 telephone_label = tkinter.Label(
     user_info_frame, text="Telefono:",  background="#FFB6C1")
 telephone_label.grid(row=3, column=0)
 
-fecha_entry = tkinter.Entry(user_info_frame)
 first_name_entry = tkinter.Entry(user_info_frame)
-second_name_entry = tkinter.Entry(user_info_frame)
+dni_entry = tkinter.Entry(user_info_frame)
 telephone_entry = tkinter.Entry(user_info_frame)
 
-fecha_entry.grid(row=0, column=4)
 first_name_entry.grid(row=1, column=1)
-second_name_entry.grid(row=2, column=1)
+dni_entry.grid(row=2, column=1)
 telephone_entry.grid(row=3, column=1)
 
 gen_label = tkinter.Label(user_info_frame, text="Sexo",  background="#FFB6C1")
@@ -197,7 +198,7 @@ plantillas_frame = tkinter.LabelFrame(
 plantillas_frame.grid(row=1, column=0, sticky="news", padx=20, pady=20)
 
 talle_default = tk.StringVar()
-talle_default.set("37")
+talle_default.set("38")
 
 plantillas_label = tkinter.Label(
     plantillas_frame, text="Plantillas:",  background="#FFB6C1")
@@ -205,13 +206,6 @@ plantillas_combobox = ttk.Combobox(plantillas_frame, values=[
                                    "Poliform", "Multiform", "Kramer", "Plastazote", "Badana", "Vaqueta", "Silicona"])
 plantillas_label.grid(row=0, column=0)
 plantillas_combobox.grid(row=1, column=0)
-
-medicos_label = tkinter.Label(
-    plantillas_frame, text="Medico:",  background="#FFB6C1")
-medicos_combobox = ttk.Combobox(plantillas_frame, values=[
-    "Di Menna", "Halliburton", "Maenza", "Rochas L", "Rochas E", "Loma"])
-medicos_label.grid(row=2, column=1)
-medicos_combobox.grid(row=3, column=1)
 
 cantidad_label = tkinter.Label(
     plantillas_frame, text="Cantidad:",  background="#FFB6C1")
@@ -229,6 +223,13 @@ talle_spinbox = tkinter.Spinbox(
 talle_label.grid(row=0, column=1)
 talle_spinbox.grid(row=1, column=1)
 
+medicos_label = tkinter.Label(
+    plantillas_frame, text="Medico:",  background="#FFB6C1")
+medicos_combobox = ttk.Combobox(plantillas_frame, values=[
+    "Di Menna", "Halliburton", "Maenza", "Rochas L", "Rochas E", "Loma"])
+medicos_label.grid(row=2, column=1)
+medicos_combobox.grid(row=3, column=1)
+
 scan_label = tkinter.Label(
     plantillas_frame, text="Estudio de la pisada:",  background="#FFB6C1")
 scan_check_var = tk.IntVar()
@@ -238,9 +239,6 @@ scan_check = tkinter.Checkbutton(
 scan_label.grid(row=1, column=3)
 scan_check.grid(row=2, column=3)
 
-precio_seg = tk.StringVar()
-precio_seg.set("$0")
-
 for widgets in plantillas_frame.winfo_children():
     widgets.grid_configure(padx=10, pady=5)
 
@@ -248,11 +246,12 @@ facturacion_frame = tkinter.LabelFrame(
     frame, text="Facturación", background="lightpink")
 facturacion_frame.grid(row=2, column=0, sticky="news", padx=20, pady=20)
 
-preciolabel_label = tkinter.Label(
-    facturacion_frame, text="Total",  background="#FFB6C1")
-preciolabel_label.grid(row=0, column=1)
+precio_label = tkinter.Label(
+    facturacion_frame, text="Total:",  background="#FFB6C1")
+precio_label.grid(row=0, column=1)
 
-precio_label = tkinter.Label(facturacion_frame,  textvariable=precio_seg)
+precio_seg = tk.IntVar()
+precio_label = tkinter.Entry(facturacion_frame,  textvariable=precio_seg)
 precio_label.grid(row=1, column=1)
 
 seña_label = tkinter.Label(
@@ -264,20 +263,31 @@ seña_entry = tkinter.Entry(facturacion_frame, textvariable=seña_var)
 seña_entry.grid(row=1, column=2)
 
 resta_var = tk.StringVar()
-resta_var.set("Resta: $0")
+resta_var.set("Resta: $")
 resta_label = tkinter.Label(facturacion_frame, textvariable=resta_var)
 resta_label.grid(row=1, column=3)
 
 calcular_button = tk.Button(
     facturacion_frame, text="Calcular Precio", command=calcular_precio)
-calcular_button.grid(row=2, column=4)
+calcular_button.grid(row=2, column=3)
+
+metodo_pago = tk.StringVar()
+efectivo_radio_button = tk.Radiobutton(
+    facturacion_frame, text="Efectivo", variable=metodo_pago, value="Efectivo", padx=10, pady=10)
+efectivo_radio_button.grid(row=0, column=4, padx=25, pady=10)
+mp_radio_button = tk.Radiobutton(
+    facturacion_frame, text="Mercado Pago", variable=metodo_pago, value="Mercado Pago", padx=10, pady=10)
+mp_radio_button.grid(row=1, column=4, padx=25, pady=10)
+tarjetas_radio_button = tk.Radiobutton(
+    facturacion_frame, text="Tarjeta", value="Tarjeta", variable=metodo_pago, padx=10, pady=10)
+tarjetas_radio_button.grid(row=2, column=4, padx=25, pady=10)
 
 button = tkinter.Button(
     facturacion_frame, text="Registrar", command=alta_registro)
 button.grid(row=3, column=0)
 
 button = tkinter.Button(
-    facturacion_frame, text="Imprimir", command=generar_doc)
+    facturacion_frame, text="Imprimir", command=lambda:[generar_pedigrafia(), generar_doc()])
 button.grid(row=3, column=1)
 
 for widgets in facturacion_frame.winfo_children():
