@@ -8,6 +8,7 @@ import datetime
 from tkinter import messagebox
 import sys
 
+
 def generar_pedigrafia():
     doc = DocxTemplate("nueva_plantigrafia.docx")
     feecha = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -23,12 +24,13 @@ def generar_pedigrafia():
                 "talle": talle,
                 "telefono": telefono,
                 "cantidad": cantidad})
-    
+
     doc_nombre = nombre + "plantigrafia" + \
-                feecha + ".docx"
+        feecha + ".docx"
     doc.save(doc_nombre)
     messagebox.showinfo("Pedigrafia generada",
                         "La pedigragia esta lista para ser impresa")
+
 
 def generar_doc():
     doc = DocxTemplate("invoice.docx")
@@ -42,6 +44,7 @@ def generar_doc():
     seña = seña_entry.get()
     resto = resta_var.get()
     pago = metodo_pago.get()
+    entrega = fecha_entrega.get()
 
     doc.render({"feecha": feecha,
                 "nombre": nombre,
@@ -52,13 +55,15 @@ def generar_doc():
                 "total": total,
                 "seña": seña,
                 "resto": resto,
-                "metodo": pago})
+                "metodo": pago,
+                "entrega": entrega})
 
     doc_name = nombre + "recibo de plantillas" +  \
-                feecha + ".docx"
+        feecha + ".docx"
     doc.save(doc_name)
     messagebox.showinfo("Recibo generado",
                         "El recibo esta listo para ser impreso")
+
 
 def alta_registro():
     fecha = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -76,6 +81,7 @@ def alta_registro():
     seña_pac = seña_entry.get()
     res_tante = resta_var.get()
     metodo_de_pago = metodo_pago.get()
+    entrega = fecha_entrega.get()
 
     print("fecha: ", fecha, "dni: ", dni, "paciente: ", paciente,
           "telefono: ", telefeono, "sexo: ", sexo, "edad: ", edad)
@@ -96,7 +102,7 @@ def alta_registro():
         sheet = workbook.active
         heading = ["Fecha", "Paciente", "dni", "Telefono", "Sexo", "Edad",
                    "Plantilla", "Medico", "Cantidad", "Talle", "Scan", "Precio",
-                   "Seña", "Restante", "Metodo de pago"]
+                   "Seña", "Restante", "Metodo de pago", "Fecha de entrega"]
         sheet.append(heading)
 
     else:
@@ -104,7 +110,7 @@ def alta_registro():
         sheet = workbook.active
 
         data = [fecha, paciente, dni, telefeono, sexo, edad, tipo_plantilla, medico_s,
-                cant_plant, talle_plant, scan_check, precio_total, seña_pac, res_tante, metodo_de_pago]
+                cant_plant, talle_plant, scan_check, precio_total, seña_pac, res_tante, metodo_de_pago, entrega]
         sheet.append(data)
 
     try:
@@ -130,7 +136,9 @@ def alta_registro():
     talle_spinbox.delete(0, tk.END)
     precio_label.delete(0, tk.END)
     seña_entry.delete(0, tk.END)
+    fecha_entrega.delete(0, tk.END)
     
+
 def calcular_precio():
     cantidad = int(cantidad_var.get())
     precio_total = int(precio_seg.get())
@@ -143,6 +151,7 @@ def calcular_precio():
     resta = precio_total - seña
     resta_var.set(f"{resta}")
 
+
 window = tkinter.Tk()
 window.title("Plantillas")
 window.configure(bg="lightpink")
@@ -151,7 +160,7 @@ frame = tkinter.Frame(window)
 frame.pack()
 
 edad_default = tk.StringVar()
-edad_default.set("30")
+edad_default.set("35")
 
 user_info_frame = tkinter.LabelFrame(
     frame, text="Datos del Paciente", background="lightpink")
@@ -239,6 +248,14 @@ scan_check = tkinter.Checkbutton(
 scan_label.grid(row=1, column=3)
 scan_check.grid(row=2, column=3)
 
+entrega_date = tkinter.Label(
+    plantillas_frame, text="Fecha entrega:", background="#FFB6C1")
+entrega_date.grid(row=1, column=4)
+date_entrega = tk.StringVar()
+fecha_entrega = tkinter.Entry(plantillas_frame, textvariable=date_entrega)
+fecha_entrega.grid(row=2, column=4)
+print(fecha_entrega)
+
 for widgets in plantillas_frame.winfo_children():
     widgets.grid_configure(padx=10, pady=5)
 
@@ -287,7 +304,7 @@ button = tkinter.Button(
 button.grid(row=3, column=0)
 
 button = tkinter.Button(
-    facturacion_frame, text="Imprimir", command=lambda:[generar_pedigrafia(), generar_doc()])
+    facturacion_frame, text="Imprimir", command=lambda: [generar_pedigrafia(), generar_doc()])
 button.grid(row=3, column=1)
 
 for widgets in facturacion_frame.winfo_children():
