@@ -11,19 +11,21 @@ import sys
 
 def generar_pedigrafia():
     doc = DocxTemplate("nueva_plantigrafia.docx")
-    feecha = datetime.datetime.now().strftime("%Y-%m-%d")
+    feecha = datetime.datetime.now().strftime("%d-%m-%Y")
     nombre = first_name_entry.get()
     telefono = telephone_entry.get()
     plantillas = plantillas_combobox.get()
     talle = talle_spinbox.get()
     cantidad = cantidad_spinbox.get()
+    medico = medicos_combobox.get()
 
     doc.render({"feecha": feecha,
                 "nombre": nombre,
                 "plantillas": plantillas,
                 "talle": talle,
                 "telefono": telefono,
-                "cantidad": cantidad})
+                "cantidad": cantidad,
+                "medico": medico, })
 
     doc_nombre = nombre + "plantigrafia" + \
         feecha + ".docx"
@@ -34,7 +36,7 @@ def generar_pedigrafia():
 
 def generar_doc():
     doc = DocxTemplate("invoice.docx")
-    feecha = datetime.datetime.now().strftime("%Y-%m-%d")
+    feecha = datetime.datetime.now().strftime("%d-%m-%Y")
     nombre = first_name_entry.get()
     plantillas = plantillas_combobox.get()
     talle = talle_spinbox.get()
@@ -66,7 +68,7 @@ def generar_doc():
 
 
 def alta_registro():
-    fecha = datetime.datetime.now().strftime("%Y-%m-%d")
+    fecha = datetime.datetime.now().strftime("%d-%m-%Y")
     paciente = first_name_entry.get()
     dni = dni_entry.get()
     telefeono = telephone_entry.get()
@@ -125,26 +127,64 @@ def alta_registro():
         print("filepath", filepath)
         print("directory", current_directory)
 
+    if medico_s:
+        medicos_dir = os.path.join(current_directory, "plantillas_medicos")
+        medicos_xl_path = os.path.join(medicos_dir, "medicos.xlsx")
+        if not os.path.exists(medicos_dir):
+            os.makedirs(medicos_dir)
+        if not os.path.exists(medicos_xl_path):
+            medicos_workbook = openpyxl.Workbook()
+            medicos_sheet = medicos_workbook.active
+            medicos_heading = ["Fecha", "Paciente", "Dni",
+                               "Plantilla", "Medico", "Cantidad", "Talle", "Precio"]
+            medicos_sheet.append(medicos_heading)
+            medicos_data = [fecha, paciente, dni, tipo_plantilla,
+                            medico_s, cant_plant, talle_plant, precio_total]
+            medicos_sheet.append(medicos_data)
+            try:
+                medicos_workbook.save(medicos_xl_path)
+                medicos_workbook.close()
+                print("Datos guardados en medicos.xlsx")
+            except Exception as e:
+                messagebox.showerror(
+                    "Error", f"Ocurrio un error guardando medicos.xlsx: {str(e)}")
+                return
+        else:
+            medicos_workbook = openpyxl.load_workbook(medicos_xl_path)
+            medicos_sheet = medicos_workbook.active
+            medicos_data = [fecha, paciente, dni, tipo_plantilla,
+                            medico_s, cant_plant, talle_plant, precio_total]
+            medicos_sheet.append(medicos_data)
+            try:
+                medicos_workbook.save(medicos_xl_path)
+                medicos_workbook.close()
+            except Exception as e:
+                messagebox.showerror(
+                    "Error", f"Ocurrio un error guardando medicos.xlsx:")
+                return
+
     first_name_entry.delete(0, tk.END)
     dni_entry.delete(0, tk.END)
     telephone_entry.delete(0, tk.END)
-    gen_combobox.delete(0, tk.END)
+    gen_combobox.set('')
     age_spinbox.delete(0, tk.END)
-    plantillas_combobox.delete(0, tk.END)
-    medicos_combobox.delete(0, tk.END)
+    plantillas_combobox.set('')
+    medicos_combobox.set('')
     cantidad_spinbox.delete(0, tk.END)
     talle_spinbox.delete(0, tk.END)
-    precio_label.delete(0, tk.END)
+    scan_check_var.set(0)
+    metodo_pago.set(0)
+    precio_seg.set('')
     seña_entry.delete(0, tk.END)
     fecha_entrega.delete(0, tk.END)
-    
+
 
 def calcular_precio():
     cantidad = int(cantidad_var.get())
     precio_total = int(precio_seg.get())
 
     if scan_check_var.get() == 1:
-        precio_total += 4000
+        precio_total += 7000
     precio_seg.set(f"{precio_total}")
 
     seña = int(seña_var.get())
@@ -194,7 +234,7 @@ gen_combobox.grid(row=2, column=3)
 
 age_label = tkinter.Label(user_info_frame, text="Edad:",  background="#FFB6C1")
 age_spinbox = tkinter.Spinbox(
-    user_info_frame, from_=3, to=110, textvariable=edad_default)
+    user_info_frame, from_=3, to=99, textvariable=edad_default)
 
 age_label.grid(row=3, column=2)
 age_spinbox.grid(row=3, column=3)
